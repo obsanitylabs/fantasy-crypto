@@ -20,12 +20,10 @@ router.get('/:sortBy?', async (req, res) => {
       'winning_amount'
     ];
     
-    if (!validSortFields.includes(sortBy)) {
-      return res.status(400).json({ error: 'Invalid sort field' });
-    }
-
+    const safeSortBy = validSortFields.includes(sortBy) ? sortBy : 'total_eth_won';
+    
     const offset = (parseInt(page) - 1) * parseInt(limit);
-    const leaderboard = await getLeaderboard(sortBy, parseInt(limit), offset);
+    const leaderboard = await getLeaderboard(safeSortBy, parseInt(limit), offset);
     
     res.json({
       data: leaderboard,
@@ -47,17 +45,33 @@ router.get('/user/:address/ranking', async (req, res) => {
     const { address } = req.params;
     const { sortBy = 'total_eth_won' } = req.query;
     
-    // Get user's ranking in the specified category
+    const validSortFields = [
+      'total_wins', 'total_eth_won', 'total_eth_wagered',
+      'win_percentage', 'total_matches', 'season_wins'
+    ];
+    
+    const safeSortBy = validSortFields.includes(sortBy) ? sortBy : 'total_eth_won';
+    
+    // Get user's ranking in the specified category using parameterized query
     const result = await query(
       `WITH ranked_users AS (
          SELECT 
            *,
-           ROW_NUMBER() OVER (ORDER BY ${sortBy} DESC, total_wins DESC) as rank
+           ROW_NUMBER() OVER (
+             ORDER BY 
+               CASE WHEN $1 = 'total_wins' THEN total_wins END DESC,
+               CASE WHEN $1 = 'total_eth_won' THEN total_eth_won END DESC,
+               CASE WHEN $1 = 'total_eth_wagered' THEN total_eth_wagered END DESC,
+               CASE WHEN $1 = 'win_percentage' THEN win_percentage END DESC,
+               CASE WHEN $1 = 'total_matches' THEN total_matches END DESC,
+               CASE WHEN $1 = 'season_wins' THEN season_wins END DESC,
+               total_wins DESC
+           ) as rank
          FROM leaderboard_view
        )
        SELECT * FROM ranked_users 
-       WHERE wallet_address = $1`,
-      [address.toLowerCase()]
+       WHERE wallet_address = $2`,
+      [safeSortBy, address.toLowerCase()]
     );
     
     if (result.rows.length === 0) {
@@ -66,7 +80,7 @@ router.get('/user/:address/ranking', async (req, res) => {
 
     res.json({
       user: result.rows[0],
-      category: sortBy
+      category: safeSortBy
     });
   } catch (error) {
     console.error('User ranking error:', error);
@@ -171,6 +185,9 @@ router.get('/user/:address/history', async (req, res) => {
     const { address } = req.params;
     const { days = 30 } = req.query;
     
+    // Validate days parameter
+    const validDays = Math.max(1, Math.min(365, parseInt(days)));
+    
     const result = await query(
       `SELECT 
          DATE(m.created_at) as date,
@@ -181,16 +198,16 @@ router.get('/user/:address/history', async (req, res) => {
        FROM matches m
        JOIN users u ON (m.player1_id = u.id OR m.player2_id = u.id)
        WHERE u.wallet_address = $1
-         AND m.created_at >= CURRENT_DATE - INTERVAL '${parseInt(days)} days'
+         AND m.created_at >= CURRENT_DATE - INTERVAL '1 day' * $2
          AND m.status = 'completed'
        GROUP BY DATE(m.created_at)
        ORDER BY date DESC`,
-      [address.toLowerCase()]
+      [address.toLowerCase(), validDays]
     );
     
     res.json({
       history: result.rows,
-      period_days: parseInt(days)
+      period_days: validDays
     });
   } catch (error) {
     console.error('User history error:', error);
