@@ -25,7 +25,7 @@ const query = async (text, params) => {
   try {
     const res = await pool.query(text, params);
     const duration = Date.now() - start;
-    console.log('Executed query', { text, duration, rows: res.rowCount });
+    console.log('Executed query', { text: text.substring(0, 50) + '...', duration, rows: res.rowCount });
     return res;
   } catch (error) {
     console.error('Database query error:', error);
@@ -104,7 +104,7 @@ const updateUserStats = async (userId, stats) => {
   await query('SELECT update_user_class($1)', [userId]);
 };
 
-const getLeaderboard = async (sortBy = 'total_eth_won', limit = 100) => {
+const getLeaderboard = async (sortBy = 'total_eth_won', limit = 100, offset = 0) => {
   const validSortFields = [
     'total_wins', 'total_eth_won', 'total_eth_wagered', 
     'win_percentage', 'total_matches', 'season_wins'
@@ -114,11 +114,19 @@ const getLeaderboard = async (sortBy = 'total_eth_won', limit = 100) => {
     sortBy = 'total_eth_won';
   }
   
+  // Use parameterized query to prevent SQL injection
   const result = await query(
     `SELECT * FROM leaderboard_view 
-     ORDER BY ${sortBy} DESC, total_wins DESC 
-     LIMIT $1`,
-    [limit]
+     ORDER BY 
+       CASE WHEN $1 = 'total_wins' THEN total_wins END DESC,
+       CASE WHEN $1 = 'total_eth_won' THEN total_eth_won END DESC,
+       CASE WHEN $1 = 'total_eth_wagered' THEN total_eth_wagered END DESC,
+       CASE WHEN $1 = 'win_percentage' THEN win_percentage END DESC,
+       CASE WHEN $1 = 'total_matches' THEN total_matches END DESC,
+       CASE WHEN $1 = 'season_wins' THEN season_wins END DESC,
+       total_wins DESC
+     LIMIT $2 OFFSET $3`,
+    [sortBy, limit, offset || 0]
   );
   
   return result.rows;
