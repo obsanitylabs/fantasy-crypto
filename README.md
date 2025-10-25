@@ -1,30 +1,57 @@
-# Fantasy Crypto
+# Fantasy Crypto Platform
 
-> Fantasy Football meets Crypto Trading - A DeFi platform for competitive cryptocurrency trading
+> Fantasy Football meets Crypto Trading - A DeFi trading competition platform built on Arbitrum
 
-![Fantasy Crypto Logo](https://via.placeholder.com/200x200?text=🏈)
+## Overview
 
-## 🌟 Overview
+Fantasy Crypto is a revolutionary platform that combines the excitement of fantasy sports with decentralized trading. Users can compete in PvP matches or join PvE leagues, trading crypto positions while earning UNITE tokens and ETH rewards.
 
-Fantasy Crypto is a revolutionary DeFi platform that combines the excitement of fantasy football with cryptocurrency trading. Players draft digital assets, create lineups, and compete in weekly matches or seasonal leagues for real ETH prizes.
+## Features
 
-### 🎯 Key Features
+### 🏈 Game Modes
+- **PvP (Player vs Player)**: Weekly head-to-head trading competitions
+- **PvE (Player vs Environment)**: 90-day league seasons with up to 12 participants
 
-- **PvP Trading Competitions**: Head-to-head weekly matches with other traders
-- **PvE League Play**: 12-player seasonal leagues running for 90 days
-- **UNITE Token Staking**: Unlock leverage, boosting, and priority draft picks
-- **Class-Based Matchmaking**: From Barnacle to Poseidon based on trading performance
-- **Real-Time Price Integration**: Built on top of Pear Protocol for accurate market data
-- **Smart Contract Escrow**: Secure, trustless prize distribution
+### 💰 Trading Classes
+- **Barnacle**: 0.1 ETH wager, $1K positions
+- **Guppie**: Entry level with small wagers
+- **Shark**: 1 ETH wager, $10K positions
+- **Whale**: 100 ETH wager, $100K positions  
+- **Poseidon**: 1000 ETH wager, $1M positions
 
-## 🚀 Quick Start
+### 🚀 UNITE Token Features
+- **Staking Rewards**: Earn UNITE tokens from match/league performance
+- **Leverage Unlocking**: Higher staking tiers unlock increased leverage (up to 10x)
+- **Draft Priority**: UNITE stakers get priority in league draft order
+- **Boosting**: High-tier stakers can use temporary leverage boosts
+
+## Technology Stack
+
+### Frontend
+- **Next.js 14** - React framework
+- **Tailwind CSS** - Styling
+- **Framer Motion** - Animations
+- **Wagmi + Reown AppKit** - Wallet integration
+- **Recharts** - Data visualization
+
+### Backend
+- **Node.js + Express** - API server
+- **PostgreSQL** - Database
+- **WebSocket** - Real-time updates
+- **Pear Protocol** - Trading execution
+
+### Smart Contracts
+- **Solidity 0.8.19** - Contract language
+- **OpenZeppelin** - Security standards
+- **Hardhat** - Development framework
+- **Arbitrum** - L2 deployment
+
+## Quick Start
 
 ### Prerequisites
-
 - Node.js 18+
-- PostgreSQL 13+
-- MetaMask or compatible Web3 wallet
-- Arbitrum network access
+- PostgreSQL 14+
+- Git
 
 ### Installation
 
@@ -36,12 +63,13 @@ cd fantasy-crypto
 # Install dependencies
 npm install
 
-# Set up environment variables
+# Setup environment variables
 cp api.conf .env
-# Edit .env with your configuration
+# Edit .env with your actual values
 
 # Initialize database
-psql -d your_database_name -f backend/database/init.sql
+psql -c "CREATE DATABASE fantasy_crypto;"
+npm run db:init
 
 # Start development servers
 npm run dev:all
@@ -52,179 +80,147 @@ npm run dev:all
 Copy `api.conf` to `.env` and configure:
 
 ```env
+# Database
 DATABASE_URL=postgresql://username:password@localhost:5432/fantasy_crypto
-JWT_SECRET=your-super-secret-jwt-key
+
+# JWT Secret
+JWT_SECRET=your-super-secret-jwt-key-here
+
+# Reown Project ID
 NEXT_PUBLIC_REOWN_PROJECT_ID=your-reown-project-id
-ARBITRUM_RPC_URL=https://arb1.arbitrum.io/rpc
+
+# API Keys
+COINMARKETCAP_API_KEY=your-cmc-key
+COINGECKO_API_KEY=your-coingecko-key
+
+# Pear Protocol
+PEAR_PROTOCOL_API_KEY=contact-pear-for-access
 ```
 
-## 🏗️ Architecture
+### Smart Contract Deployment
 
-### Frontend (Next.js + React)
-- **Framework**: Next.js 14 with React 18
-- **Styling**: Tailwind CSS with custom components
-- **Wallet Integration**: Reown AppKit (formerly WalletConnect)
-- **State Management**: React hooks + TanStack Query
-- **Animations**: Framer Motion
+```bash
+# Compile contracts
+npm run compile
 
-### Backend (Node.js + Express)
-- **API Server**: Express.js with RESTful endpoints
-- **Database**: PostgreSQL with connection pooling
-- **Real-time**: WebSocket connections for live updates
-- **Authentication**: JWT tokens with wallet signature verification
-
-### Smart Contracts (Solidity)
-- **UNITE Token**: ERC-20 token with staking functionality
-- **Fantasy Crypto**: Main contract for matches and escrow
-- **Network**: Deployed on Arbitrum for low fees
-
-### External Integrations
-- **Pear Protocol**: Trading data and order routing
-- **Telegram Bot**: Match notifications
-- **CoinMarketCap/CoinGecko**: Additional market data
-
-## 🎮 How to Play
-
-### PvP Matches
-
-1. **Connect Wallet**: Support for MetaMask, Phantom, and WalletConnect
-2. **Set Parameters**: Choose wager amount (0.1-1000 ETH) and position size ($1K-$1M+)
-3. **Find Opponent**: Automated matchmaking based on class and preferences
-4. **Draft Phase**: Each player drafts 12 coins in snake format
-5. **Daily Management**: Set 6 long and 6 short positions daily
-6. **Settlement**: Winner takes ~80% of pot, platform keeps 10%, remaining goes to insurance
-
-### PvE Leagues
-
-1. **Join League**: 12-player leagues by class (Barnacle, Shark, Whale, Poseidon)
-2. **Live Draft**: Snake draft with UNITE staker priority
-3. **Season Play**: 90-day competitions with daily lineup management
-4. **Boosting**: UNITE stakers can use leverage for 16-hour periods
-5. **Final Rankings**: Top 3 win ETH prizes, all participants earn UNITE tokens
-
-### User Classes
-
-- **🪨 Barnacle**: New traders (0.1 ETH wagers, $1K positions)
-- **🐠 Guppie**: Learning traders
-- **🦈 Shark**: Experienced traders (1 ETH wagers, $10K positions)
-- **🐋 Whale**: Serious competitors (100 ETH wagers, $100K positions)
-- **🔱 Poseidon**: Elite traders (1000 ETH wagers, $1M positions)
-
-## 💎 UNITE Token Economics
-
-### Staking Tiers
-
-| Tier | UNITE Required | Leverage | Draft Priority | Boosting |
-|------|----------------|----------|----------------|---------|
-| 1 | 10,000 | 2x | +0.1 | ❌ |
-| 2 | 20,000 | 3x | +0.2 | ❌ |
-| 3 | 30,000 | 4x | +0.3 | ❌ |
-| 4 | 40,000 | 5x | +0.4 | ❌ |
-| 5 | 50,000+ | 10x | +0.5 | ✅ |
-
-### Token Distribution
-
-- **Total Supply**: 1,000,000 UNITE
-- **Reward Pool**: 1,000,000 UNITE for competition prizes
-- **PvP Rewards**: 90 UNITE (winner) / 10 UNITE (loser)
-- **PvE Rewards**: 10K/3K/1K UNITE for top 3, 100 UNITE for others
-
-## 🛠️ Development
-
-### Project Structure
-
-```
-fantasy-crypto/
-├── pages/              # Next.js pages
-├── components/         # React components
-├── styles/            # Global CSS and Tailwind
-├── backend/           # Express.js API server
-│   ├── routes/        # API route handlers
-│   ├── database/      # DB schema and connection
-│   ├── services/      # Business logic
-│   └── utils/         # Helper functions
-├── contracts/         # Solidity smart contracts
-└── public/           # Static assets
+# Deploy to Arbitrum
+npm run deploy
 ```
 
-### API Endpoints
-
-- `GET /api/auth/user/:address` - Get/create user profile
-- `POST /api/matches/create` - Create PvP match
-- `GET /api/matches/user/:address` - Get user's matches
-- `GET /api/leaderboard/:sortBy` - Get leaderboard data
-- `POST /api/unite/stake` - Stake UNITE tokens
-- `GET /api/leagues/available/:class` - Get available leagues
-- `GET /api/platform/stats` - Platform statistics
+## Architecture
 
 ### Database Schema
+- **Users**: Wallet addresses, stats, UNITE balances
+- **Matches**: PvP match data and results
+- **Leagues**: PvE league information
+- **Lineups**: Daily trading positions
+- **Drafted Coins**: User's selected trading pairs
+- **UNITE Rewards**: Token distribution tracking
 
-Key tables:
-- `users` - User profiles and stats
-- `matches` - PvP match data
-- `leagues` - PvE league information
-- `drafted_coins` - Player coin selections
-- `lineups` - Daily position management
-- `unite_rewards` - Token reward tracking
+### API Endpoints
+- `/api/auth` - User authentication
+- `/api/matches` - PvP match management
+- `/api/leagues` - PvE league operations
+- `/api/trading` - Position management
+- `/api/unite` - Token staking/rewards
+- `/api/leaderboard` - Rankings and stats
 
-### Smart Contract Addresses
+### Smart Contracts
+- **UniteToken.sol**: ERC20 token with staking features
+- **FantasyCrypto.sol**: Main platform contract with escrow
 
-*Contracts will be deployed to Arbitrum mainnet*
+## Game Flow
 
-- UNITE Token: `TBD`
-- Fantasy Crypto: `TBD`
+### PvP Matches
+1. Users set wager amount and position size
+2. Matching system finds suitable opponents
+3. Draft phase: Select 12 coins for trading
+4. Active trading: Daily lineup management (6 long, 6 short)
+5. Settlement: Winner takes pot minus platform fees
 
-## 🔒 Security
+### PvE Leagues
+1. Join class-appropriate league (12 players max)
+2. Live snake draft when league fills
+3. 90-day season with daily lineup changes
+4. Rankings based on realized + open P&L
+5. Prize distribution to top performers
 
-- **Smart Contract Audits**: Professional audit required before mainnet
-- **Wallet Signature Verification**: Secure authentication
-- **Escrow Protection**: All funds held in smart contracts
-- **Insurance Fund**: 5% of all fees go to insurance pool
-- **Emergency Functions**: Pause/unpause capabilities
+### UNITE Token Economy
+- **1M Total Supply**: Fixed token cap
+- **Reward Distribution**: 
+  - PvP Winner: 90 UNITE
+  - PvP Loser: 10 UNITE
+  - PvE 1st: 10,000 UNITE
+  - PvE 2nd: 3,000 UNITE
+  - PvE 3rd: 1,000 UNITE
+  - Others: 100 UNITE
+- **Platform Fees**: 10% total (5% insurance, 5% UNITE stakers)
 
-## 🤝 Contributing
+## Security Features
 
+- **Wallet-based Authentication**: No passwords needed
+- **Smart Contract Escrow**: Automated fund management
+- **SQL Injection Protection**: Parameterized queries
+- **Input Validation**: Comprehensive data sanitization
+- **Rate Limiting**: API abuse prevention
+
+## Development
+
+### Running Tests
+```bash
+# Backend tests
+npm run test:backend
+
+# Contract tests
+npm run test:contracts
+
+# Integration tests
+npm run test:integration
+```
+
+### Contributing
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
 
-## 📄 License
+## Deployment
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+### Production Setup
+1. Configure environment variables
+2. Deploy smart contracts to Arbitrum mainnet
+3. Set up PostgreSQL database
+4. Deploy backend to your preferred hosting
+5. Deploy frontend to Vercel/Netlify
+6. Configure monitoring and logging
 
-## 🎯 Roadmap
+### Monitoring
+- Database performance monitoring
+- API endpoint monitoring  
+- Smart contract event tracking
+- WebSocket connection health
+- Trading volume and user metrics
 
-### Phase 1 (Q1 2024)
-- [x] Core platform development
-- [x] Smart contract deployment
-- [ ] Beta testing program
-- [ ] Security audit
+## Roadmap
 
-### Phase 2 (Q2 2024)
-- [ ] Mainnet launch
-- [ ] Mobile app development
-- [ ] Advanced trading features
-- [ ] Partnership integrations
+- **Phase 1**: Core PvP and PvE functionality
+- **Phase 2**: Mobile app development
+- **Phase 3**: Advanced trading features
+- **Phase 4**: Cross-chain expansion
+- **Phase 5**: DAO governance implementation
 
-### Phase 3 (Q3 2024)
-- [ ] NFT integration
-- [ ] Cross-chain expansion
-- [ ] Advanced analytics
-- [ ] Community governance
+## License
 
-## 🎉 Community
+MIT License - see [LICENSE](LICENSE) for details
 
-- **Website**: [fantasycrypto.io](https://fantasycrypto.io)
-- **Discord**: [Join our community](https://discord.gg/fantasycrypto)
-- **Twitter**: [@FantasyCrypto](https://twitter.com/fantasycrypto)
-- **Telegram**: [t.me/fantasycrypto](https://t.me/fantasycrypto)
+## Support
 
-## ⚠️ Disclaimer
-
-*Fantasy Crypto is a experimental DeFi platform. Cryptocurrency trading involves substantial risk of loss. Never risk more than you can afford to lose. This platform is for entertainment and educational purposes. Users must comply with local regulations.*
+For questions and support:
+- Email: support@fantasycrypto.io
+- Discord: [Fantasy Crypto Community](https://discord.gg/fantasycrypto)
+- Telegram: [@FantasyCrypto](https://t.me/FantasyCrypto)
 
 ---
 
-**"It's now or never"** - Trade responsibly and may the best trader win! 🏈💎
+**"It's now or never" - Start your Fantasy Crypto journey today!** 🏈⚡

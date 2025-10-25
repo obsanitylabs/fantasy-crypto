@@ -1,91 +1,85 @@
-const hardhat = require('hardhat');
+const hre = require("hardhat");
 
 async function main() {
-  console.log('Starting deployment to Arbitrum...');
-  
-  const [deployer] = await ethers.getSigners();
-  console.log('Deploying contracts with account:', deployer.address);
-  console.log('Account balance:', (await deployer.getBalance()).toString());
+  const [deployer] = await hre.ethers.getSigners();
 
-  // Deploy UNITE Token first
-  console.log('\nDeploying UNITE Token...');
-  const UniteToken = await ethers.getContractFactory('UniteToken');
+  console.log("Deploying contracts with the account:", deployer.address);
+  console.log("Account balance:", (await deployer.getBalance()).toString());
+
+  // Deploy UNITE Token
+  const UniteToken = await hre.ethers.getContractFactory("UniteToken");
   const uniteToken = await UniteToken.deploy();
   await uniteToken.deployed();
-  console.log('UNITE Token deployed to:', uniteToken.address);
 
-  // Deploy Fantasy Crypto contract
-  console.log('\nDeploying Fantasy Crypto contract...');
-  const FantasyCrypto = await ethers.getContractFactory('FantasyCrypto');
-  
-  // Set up treasury and insurance addresses (should be multisig wallets in production)
-  const treasuryAddress = process.env.TREASURY_ADDRESS || deployer.address;
-  const insuranceAddress = process.env.INSURANCE_ADDRESS || deployer.address;
-  
+  console.log("UNITE Token deployed to:", uniteToken.address);
+
+  // Set up treasury and insurance addresses (replace with actual addresses)
+  const treasuryAddress = deployer.address; // Replace with actual treasury
+  const insuranceAddress = deployer.address; // Replace with actual insurance
+
+  // Deploy Fantasy Crypto Contract
+  const FantasyCrypto = await hre.ethers.getContractFactory("FantasyCrypto");
   const fantasyCrypto = await FantasyCrypto.deploy(
     uniteToken.address,
     treasuryAddress,
     insuranceAddress
   );
   await fantasyCrypto.deployed();
-  console.log('Fantasy Crypto contract deployed to:', fantasyCrypto.address);
 
-  // Set Fantasy Crypto contract as owner of UNITE token for reward distribution
-  console.log('\nTransferring UNITE token ownership...');
+  console.log("Fantasy Crypto deployed to:", fantasyCrypto.address);
+
+  // Set Fantasy Crypto as owner of UNITE token for reward distribution
   await uniteToken.transferOwnership(fantasyCrypto.address);
-  console.log('UNITE token ownership transferred to Fantasy Crypto contract');
+  console.log("UNITE Token ownership transferred to Fantasy Crypto contract");
 
-  // Verify contracts on Arbiscan (if API key is provided)
-  if (process.env.ARBISCAN_API_KEY) {
-    console.log('\nVerifying contracts...');
-    
+  // Verify contracts on Arbiscan (if on mainnet)
+  if (hre.network.name !== "hardhat" && hre.network.name !== "localhost") {
+    console.log("Waiting for block confirmations...");
+    await uniteToken.deployTransaction.wait(5);
+    await fantasyCrypto.deployTransaction.wait(5);
+
     try {
-      await hardhat.run('verify:verify', {
+      await hre.run("verify:verify", {
         address: uniteToken.address,
-        constructorArguments: []
+        constructorArguments: [],
       });
-      console.log('UNITE Token verified');
-    } catch (error) {
-      console.log('UNITE Token verification failed:', error.message);
-    }
 
-    try {
-      await hardhat.run('verify:verify', {
+      await hre.run("verify:verify", {
         address: fantasyCrypto.address,
         constructorArguments: [
           uniteToken.address,
           treasuryAddress,
-          insuranceAddress
-        ]
+          insuranceAddress,
+        ],
       });
-      console.log('Fantasy Crypto contract verified');
     } catch (error) {
-      console.log('Fantasy Crypto verification failed:', error.message);
+      console.error("Verification failed:", error);
     }
   }
 
-  // Output deployment summary
-  console.log('\n=== Deployment Summary ===');
-  console.log('Network:', hardhat.network.name);
-  console.log('Deployer:', deployer.address);
-  console.log('UNITE Token:', uniteToken.address);
-  console.log('Fantasy Crypto:', fantasyCrypto.address);
-  console.log('Treasury:', treasuryAddress);
-  console.log('Insurance Fund:', insuranceAddress);
-  
-  console.log('\n=== Next Steps ===');
-  console.log('1. Update api.conf with contract addresses');
-  console.log('2. Set up multisig wallets for treasury and insurance');
-  console.log('3. Configure Pear Protocol API access');
-  console.log('4. Set up Telegram bot for notifications');
-  console.log('5. Initialize database with contract addresses');
-  
-  console.log('\nDeployment completed successfully! 🎉');
+  // Save deployment addresses to a file
+  const fs = require('fs');
+  const deploymentInfo = {
+    network: hre.network.name,
+    uniteToken: uniteToken.address,
+    fantasyCrypto: fantasyCrypto.address,
+    treasury: treasuryAddress,
+    insurance: insuranceAddress,
+    deployer: deployer.address,
+    deployedAt: new Date().toISOString()
+  };
+
+  fs.writeFileSync(
+    `deployments-${hre.network.name}.json`,
+    JSON.stringify(deploymentInfo, null, 2)
+  );
+
+  console.log("Deployment info saved to deployments-${hre.network.name}.json");
 }
 
 main()
   .then(() => process.exit(0))
   .catch((error) => {
-    console.error('Deployment failed:', error);
+    console.error(error);
     process.exit(1);
   });

@@ -1,4 +1,4 @@
-require('@nomicfoundation/hardhat-toolbox');
+require("@nomicfoundation/hardhat-toolbox");
 require('dotenv').config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
@@ -8,32 +8,35 @@ module.exports = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200
-      }
-    }
+        runs: 200,
+      },
+    },
   },
   networks: {
     hardhat: {
-      chainId: 31337
+      chainId: 1337,
     },
     arbitrum: {
-      url: process.env.ARBITRUM_RPC_URL || 'https://arb1.arbitrum.io/rpc',
+      url: process.env.ARBITRUM_RPC_URL || "https://arb1.arbitrum.io/rpc",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      chainId: 42161
+      chainId: 42161,
     },
-    arbitrumSepolia: {
-      url: 'https://sepolia-rollup.arbitrum.io/rpc',
+    arbitrumGoerli: {
+      url: "https://goerli-rollup.arbitrum.io/rpc",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      chainId: 421614
-    }
+      chainId: 421613,
+    },
   },
   etherscan: {
     apiKey: {
-      arbitrumOne: process.env.ARBISCAN_API_KEY || ''
-    }
+      arbitrumOne: process.env.ARBISCAN_API_KEY || "",
+      arbitrumGoerli: process.env.ARBISCAN_API_KEY || "",
+    },
   },
-  gasReporter: {
-    enabled: process.env.REPORT_GAS !== undefined,
-    currency: 'USD'
-  }
+  paths: {
+    sources: "./contracts",
+    tests: "./test",
+    cache: "./cache",
+    artifacts: "./artifacts",
+  },
 };
