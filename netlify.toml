@@ -1,17 +1,27 @@
 [build]
-  publish = ".next"
+  # Build command for Netlify
   command = "npm run build"
+  
+  # Directory to publish (Next.js output)
+  publish = ".next"
+  
+  # Node.js version
+  [build.environment]
+    NODE_VERSION = "18"
+    NEXT_PUBLIC_DEMO_MODE = "true"
+    NEXT_PUBLIC_REOWN_PROJECT_ID = "demo-project-id"
 
-[build.environment]
-  NODE_VERSION = "18"
-
+# Redirect all API calls to a 404 page in production
 [[redirects]]
   from = "/api/*"
-  to = "https://your-backend-url.com/api/:splat"
-  status = 200
+  to = "/404"
+  status = 404
 
-[functions]
-  directory = "netlify/functions"
+# SPA redirect for Next.js routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
 
 # Headers for security
 [[headers]]
@@ -21,14 +31,20 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), location=()"
+    
+# Cache static assets
+[[headers]]
+  for = "/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
 
-# Next.js specific redirects
-[[redirects]]
-  from = "/_next/static/*"
-  to = "/static/:splat"
-  status = 200
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
